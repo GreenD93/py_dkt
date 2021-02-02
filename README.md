@@ -10,3 +10,6 @@ Deep knowledge tracing based on pytorch
 
 ## Reference code
 https://github.com/chsong513/DeepKnowledgeTracing-DKT-Pytorch
+
+## Paper
+https://web.stanford.edu/~cpiech/bio/papers/deepKnowledgeTracing.pdf
