@@ -14,8 +14,10 @@ class lossFunc(nn.Module):
 
         acc = 0
 
-        # qt -> qt+1
+        # qt
         delta = batch[:,:,:QUESTION_NUM] + batch[:,:,QUESTION_NUM:]
+
+        # qt+1 & transpose for matrix multiplication
         delta = delta[:,1:,:].permute(0,2,1)
 
         # yt

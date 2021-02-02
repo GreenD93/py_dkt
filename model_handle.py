@@ -162,7 +162,75 @@ class ModelHandler():
             return val_loss, val_acc
 
     def evaluate(self, test_generator):
+        test_loss, test_acc = self._optimize(test_generator, 0, train=False)
+        print('-'*50)
+        print(f" test_acc : {test_acc:.4f}, test_loss : {test_loss.item():.4f}")
         pass
 
-    def predict(self):
-        pass
+    def predict(self, x):
+
+        def _cal_prob(x):
+
+            # qt
+            delta = x[:,:,:QUESTION_NUM] + x[:,:,QUESTION_NUM:]
+
+            # qt+1
+            delta = delta[:,1:,:].permute(0,2,1)
+
+            # yt
+            pred = self.model(x)
+            y = pred[:, :MAX_SEQ - 1,:]
+
+            # pred at+1
+            temp = torch.matmul(y, delta) # 1, MAX_SEQ, MAX_SEQ-1(prob)
+
+            # get excercise prob from diagonal matrix
+            prob = torch.diagonal(temp, dim1=1, dim2=2) # 1, MAX_SEQ-1(prob)\
+
+            return prob.squeeze(0)
+
+        def _get_q_sequence(q_seq_one_hot):
+
+            q_sequence = []
+            one_hot_excercise_tags = q_seq_one_hot[:, :, :QUESTION_NUM] + q_seq_one_hot[:, :, QUESTION_NUM:]
+            one_hot_excercise_tags = one_hot_excercise_tags.squeeze(0)
+
+            for one_hot_excercise_tag in one_hot_excercise_tags:
+                try:
+                    excercise_tag = torch.nonzero(one_hot_excercise_tag).item()
+                except:
+                    excercise_tag = -1
+
+                q_sequence.append(excercise_tag)
+
+            return torch.Tensor(q_sequence)
+
+        def _get_a_sequence(q_seq_one_hot):
+            q_seq_one_hot = q_seq_one_hot.squeeze(0)
+            a_sequence = ((q_seq_one_hot[:, :QUESTION_NUM] - q_seq_one_hot[:, QUESTION_NUM:]).sum(1) + 1) // 2
+            return a_sequence
+
+
+        if len(x.size()) == 2:
+            x = x.unsqueeze(0)
+
+        x = x.to(self.device)
+
+        prob = _cal_prob(x)
+
+        q_sequence = _get_q_sequence(x)
+        a_sequence = _get_a_sequence(x)
+
+        print('-' * 50)
+        print(f'sol excercise tags: \n {q_sequence[:-1]}')
+        print(f'result excercise tags: \n {a_sequence[:-1]}')
+        print('-' * 50)
+
+        if -1 in q_sequence:
+            last_excercise_tag = torch.nonzero(q_sequence == -1)[0][0].item() - 1
+        else:
+            last_excercise_tag = len(q_sequence) - 1
+
+        print(f'predict excercise tag {q_sequence[last_excercise_tag]}')
+        print(f'ground truth : {a_sequence[last_excercise_tag]}')
+        print(f'this student has a {prob[last_excercise_tag-1]:.2f}% chance of solving this problem')
