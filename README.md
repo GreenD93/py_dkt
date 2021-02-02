@@ -2,10 +2,10 @@
 Deep knowledge tracing based on pytorch
 
 ## RUN
-python main.py
+`python main.py`
 
 ## Eval & Predict
-eval.ipynb
+`eval.ipynb`
 
 
 ## Reference code
