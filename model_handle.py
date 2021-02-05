@@ -221,15 +221,15 @@ class ModelHandler():
         q_sequence = _get_q_sequence(x)
         a_sequence = _get_a_sequence(x)
 
-        print('-' * 50)
-        print(f'sol excercise tags: \n {q_sequence[:-1]}')
-        print(f'result excercise tags: \n {a_sequence[:-1]}')
-        print('-' * 50)
-
         if -1 in q_sequence:
             last_excercise_tag = torch.nonzero(q_sequence == -1)[0][0].item() - 1
         else:
             last_excercise_tag = len(q_sequence) - 1
+
+        print('-' * 50)
+        print(f'sol excercise tags: \n {q_sequence[:last_excercise_tag-1]}')
+        print(f'result excercise tags: \n {a_sequence[:last_excercise_tag-1]}')
+        print('-' * 50)
 
         print(f'predict excercise tag {q_sequence[last_excercise_tag]}')
         print(f'ground truth : {a_sequence[last_excercise_tag]}')
