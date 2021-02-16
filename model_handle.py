@@ -46,7 +46,8 @@ class ModelHandler():
     def compile_model(self):
         self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
         self.loss_fn = lossFunc().to(self.device)
-
+        self.model.to(self.device)
+        
         print('compile model', '-' * 20)
         print(self.optimizer)
         print('')
@@ -64,7 +65,6 @@ class ModelHandler():
 
     def train(self, train_generator, val_generator, n_epoch):
 
-        self.model.to(self.device)
         min_loss = 10e+8
 
         for epoch in tqdm.tqdm(range(n_epoch), desc='Training:', mininterval=2):
@@ -233,4 +233,4 @@ class ModelHandler():
 
         print(f'predict excercise tag {q_sequence[last_excercise_tag]}')
         print(f'ground truth : {a_sequence[last_excercise_tag]}')
-        print(f'this student has a {prob[last_excercise_tag-1]:.2f}% chance of solving this problem')
+        print(f'this student has a {prob[last_excercise_tag-1]*100:.2f}% chance of solving this problem')
